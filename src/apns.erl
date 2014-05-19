@@ -13,6 +13,7 @@
 -define(EPOCH, 62167219200).
 -define(MAX_PAYLOAD, 256).
 
+-export([default_connection/0]).
 -export([start/0, stop/0]).
 -export([connect/0, connect/1, connect/2, connect/3, disconnect/1]).
 -export([send_badge/3, send_message/2, send_message/3, send_message/4, send_message/5,
