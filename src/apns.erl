@@ -90,7 +90,6 @@ disconnect(ConnId) ->
 
 
 %% @doc Sends a message to Apple
--spec send_message(conn_id(), Payload, BinToken :: binary()) -> ok.
 send_message_fast(ConnId, Payload, BinToken) ->
   apns_connection:send_message_fast(ConnId, Payload, BinToken).
 

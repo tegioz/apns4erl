@@ -35,7 +35,6 @@ send_message(ConnId, Msg) ->
   gen_server:cast(ConnId, Msg).
 
 %% @doc  Sends a message to apple through the connection
--spec send_message(apns:conn_id(), Payload, BinToken :: binary()) -> ok.
 send_message_fast(ConnId, Payload, BinToken) ->
   gen_server:cast(ConnId, {fast, Payload, BinToken}).
 
