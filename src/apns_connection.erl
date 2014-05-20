@@ -35,8 +35,8 @@ send_message(ConnId, Msg) ->
   gen_server:cast(ConnId, Msg).
 
 %% @doc  Sends a message to apple through the connection
-send_message_fast(ConnId, Payload, BinToken) ->
-  gen_server:cast(ConnId, {fast, Payload, BinToken}).
+send_message_fast(ConnId, BinToken, Payload) ->
+  gen_server:cast(ConnId, {fast, BinToken, Payload}).
 
 %% @doc  Stops the connection
 -spec stop(apns:conn_id()) -> ok.
@@ -148,7 +148,7 @@ handle_cast(Msg, State) when is_record(Msg, apns_msg) ->
       {stop, {error, Reason}, State}
   end;
 
-handle_cast({fast, Payload, BinToken}, State) ->
+handle_cast({fast, BinToken, Payload}, State) ->
   Socket = State#state.out_socket,
   case send_payload(Socket, <<"">>, 86400, BinToken, Payload) of
     ok ->

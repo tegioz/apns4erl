@@ -90,8 +90,8 @@ disconnect(ConnId) ->
 
 
 %% @doc Sends a message to Apple
-send_message_fast(ConnId, Payload, BinToken) ->
-  apns_connection:send_message_fast(ConnId, Payload, BinToken).
+send_message_fast(ConnId, BinToken, Payload) ->
+  apns_connection:send_message_fast(ConnId, BinToken, Payload).
 
 
 %% @doc Sends a message to Apple
