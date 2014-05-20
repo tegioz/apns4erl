@@ -15,6 +15,8 @@
 -export([start_link/1, start_link/2, init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([send_message/2, stop/1]).
 -export([build_payload/1]).
+-export([send_message_fast/3]).
+-export([hexstr_to_bin/1]).
 
 -record(state, {out_socket        :: tuple(),
                 in_socket         :: tuple(),
@@ -31,6 +33,11 @@
 -spec send_message(apns:conn_id(), #apns_msg{}) -> ok.
 send_message(ConnId, Msg) ->
   gen_server:cast(ConnId, Msg).
+
+%% @doc  Sends a message to apple through the connection
+-spec send_message(apns:conn_id(), Payload, BinToken :: binary()) -> ok.
+send_message_fast(ConnId, Payload, BinToken) ->
+  gen_server:cast(ConnId, {fast, Payload, BinToken}).
 
 %% @doc  Stops the connection
 -spec stop(apns:conn_id()) -> ok.
@@ -136,6 +143,15 @@ handle_cast(Msg, State) when is_record(Msg, apns_msg) ->
   Payload = build_payload(Msg),
   BinToken = hexstr_to_bin(Msg#apns_msg.device_token),
   case send_payload(Socket, Msg#apns_msg.id, Msg#apns_msg.expiry, BinToken, Payload) of
+    ok ->
+      {noreply, State};
+    {error, Reason} ->
+      {stop, {error, Reason}, State}
+  end;
+
+handle_cast({fast, Payload, BinToken}, State) ->
+  Socket = State#state.out_socket,
+  case send_payload(Socket, <<"">>, 86400, BinToken, Payload) of
     ok ->
       {noreply, State};
     {error, Reason} ->
@@ -288,8 +304,8 @@ send_payload(Socket, MsgId, Expiry, BinToken, Payload) ->
                 BinToken/binary,
                 PayloadLength:16/big,
                 BinPayload/binary>>],
-    error_logger:info_msg("Sending msg ~p (expires on ~p)~n",
-                         [MsgId, Expiry]),
+    %%error_logger:info_msg("Sending msg ~p (expires on ~p)~n",
+                         %[MsgId, Expiry]),
     ssl:send(Socket, Packet).
 
 hexstr_to_bin(S) ->

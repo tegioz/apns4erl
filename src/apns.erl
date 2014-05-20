@@ -21,6 +21,7 @@
 -export([send_content_available/2, send_content_available/3]).
 -export([estimate_available_bytes/1]).
 -export([message_id/0, expiry/1, timestamp/1]).
+-export([send_message_fast/3]).
 
 -type status() :: no_errors | processing_error | missing_token | missing_topic | missing_payload |
                   missing_token_size | missing_topic_size | missing_payload_size | invalid_token |
@@ -86,6 +87,13 @@ connect(Name, ErrorFun, FeedbackFun) ->
 -spec disconnect(conn_id()) -> ok.
 disconnect(ConnId) ->
   apns_connection:stop(ConnId).
+
+
+%% @doc Sends a message to Apple
+-spec send_message(conn_id(), Payload, BinToken :: binary()) -> ok.
+send_message_fast(ConnId, Payload, BinToken) ->
+  apns_connection:send_message_fast(ConnId, Payload, BinToken).
+
 
 %% @doc Sends a message to Apple
 -spec send_message(conn_id(), #apns_msg{}) -> ok.
