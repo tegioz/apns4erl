@@ -150,7 +150,7 @@ handle_cast(Msg, State) when is_record(Msg, apns_msg) ->
 
 handle_cast({fast, BinToken, Payload}, State) ->
   Socket = State#state.out_socket,
-  case send_payload(Socket, <<"">>, 86400, BinToken, Payload) of
+  case send_payload(Socket, apns:message_id(), 0, BinToken, Payload) of
     ok ->
       {noreply, State};
     {error, Reason} ->
@@ -303,8 +303,7 @@ send_payload(Socket, MsgId, Expiry, BinToken, Payload) ->
                 BinToken/binary,
                 PayloadLength:16/big,
                 BinPayload/binary>>],
-    %%error_logger:info_msg("Sending msg ~p (expires on ~p)~n",
-                         %[MsgId, Expiry]),
+    error_logger:info_msg("Sending msg ~p (expires on ~p)~n", [MsgId, Expiry]),
     ssl:send(Socket, Packet).
 
 hexstr_to_bin(S) ->
