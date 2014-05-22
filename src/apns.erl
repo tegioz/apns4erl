@@ -88,11 +88,9 @@ connect(Name, ErrorFun, FeedbackFun) ->
 disconnect(ConnId) ->
   apns_connection:stop(ConnId).
 
-
 %% @doc Sends a message to Apple
 send_message_fast(ConnId, BinToken, Payload) ->
   apns_connection:send_message_fast(ConnId, BinToken, Payload).
-
 
 %% @doc Sends a message to Apple
 -spec send_message(conn_id(), #apns_msg{}) -> ok.

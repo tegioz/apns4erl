@@ -16,6 +16,7 @@
 -export([send_message/2, stop/1]).
 -export([build_payload/1]).
 -export([send_message_fast/3]).
+-export([send_batch/3]).
 -export([hexstr_to_bin/1]).
 
 -record(state, {out_socket        :: tuple(),
@@ -37,6 +38,9 @@ send_message(ConnId, Msg) ->
 %% @doc  Sends a message to apple through the connection
 send_message_fast(ConnId, BinToken, Payload) ->
   gen_server:cast(ConnId, {fast, BinToken, Payload}).
+
+send_batch(ConnId, Tokens, Payload) ->
+  gen_server:cast(ConnId, {batch, Tokens, Payload}).
 
 %% @doc  Stops the connection
 -spec stop(apns:conn_id()) -> ok.
@@ -156,6 +160,18 @@ handle_cast({fast, BinToken, BinPayload}, State) ->
     {error, Reason} ->
       {stop, {error, Reason}, State}
   end;
+
+handle_cast({batch, Tokens, Payload}, State) ->
+  Socket = State#state.out_socket,
+  SendPayload = fun(Token, _Acc) ->
+    case send_payload_fast(Socket, apns:message_id(), 600, Token, Payload) of
+      ok ->
+        {noreply, State};
+      {error, Reason} ->
+        {stop, {error, Reason}, State}
+    end
+  end,
+  lists:foldl(SendPayload, undefined, Tokens);
 
 handle_cast(stop, State) ->
   {stop, normal, State}.
