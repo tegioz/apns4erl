@@ -171,7 +171,7 @@ handle_cast({batch, Tokens, Payload}, State) ->
         {stop, {error, Reason}, State}
     end
   end,
-  lists:foldl(SendPayload, undefined, Tokens);
+  lists:foldl(SendPayload, {noreply, State}, Tokens);
 
 handle_cast(stop, State) ->
   {stop, normal, State}.
